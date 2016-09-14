@@ -2,11 +2,13 @@ var correctWord = require('./word.js');
 var computerGuess = require('./game.js');
 var userGuess;
 var correctGuesses = 0;
-var guesses = 0;
+var guessesLeft = 12;
 var lettersGuessed = [];
 var inquirer = require('inquirer');
 
-function checkGuess() {
+console.log(lettersGuessed);
+
+function chooseLetter() {
 	inquirer.prompt([
 		{
 			type: "input",
@@ -15,34 +17,44 @@ function checkGuess() {
 		},
 	]).then(function (user) {
 		console.log(JSON.stringify(user, null, 2));
-		if (user.input != ""){
-			guesses++;
+		if (user.letter != ""){
 			userGuess = user.letter;
-			lettersGuessed.push(user.letter);
-			checkGuess();
+			validateGuess();
 		}
 		else {
 			console.log("That's okay, come again when you are more sure.");
 		}
 	});
+};
 
+function validateGuess() {
+	for (i = 0; i < lettersGuessed.length; i++) {
+		if (userGuess === lettersGuessed[i]) {
+			play();
+		}
+	}
+	if (userGuess.length > 1) {
+		play();
+	}
+	else {
+		checkGuess();
+	}
+};
+
+function checkGuess() {
 	for (i = 0; i < computerGuess.length; i++) {
 		if (userGuess === computerGuess[i]) {
 			correctWord.splice(i, 1, userGuess);
 			correctGuesses++;
-			console.log(correctWord);
-			console.log("Correct Guesses: " + correctGuesses);
-			console.log("# of guesses made: " + guesses);
-			console.log("Letters Guessed: " + lettersGuessed);
-		}
-		else {
-			guesses++;
-			console.log(correctWord);
-			console.log("Correct Guesses: " + correctGuesses);
-			console.log("# of guesses made: " + guesses);
-			console.log("Letters Guessed: " + lettersGuessed);
 		}
 	}
+	guessesLeft--;
+	lettersGuessed.push(userGuess);
+	console.log(correctWord);
+	console.log("Guesses Left: " + guessesLeft);
+	console.log("Letters Guessed: " + lettersGuessed);
+
+	play();
 };
 
 function isFinished() {
@@ -54,17 +66,17 @@ function play() {
 		console.log("Finished!");
 		complete();
 	}
+	else if (guessesLeft <= 0) {
+		console.log("You lose");
+		complete();
+	}
 	else {
-		checkGuess();
+		chooseLetter();
 	}
 };
 
 function complete() {
 	console.log(correctWord);
-}
+};
 
 play();
-
-
-
-// Create a "Prompt" with a series of questions.
